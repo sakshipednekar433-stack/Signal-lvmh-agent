@@ -1,3 +1,11 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "api/analyze.js": {
+      "maxDuration": 60
+    },
+    "api/ask.js": {
+      "maxDuration": 30
+    }
+  }
 }

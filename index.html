@@ -3,387 +3,884 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumière · LVMH Earnings Intelligence</title>
+<title>Lumière · Financial Intelligence</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <style>
-  :root{
-    --ink:#13110E;
-    --bone:#F6F2EA;
-    --champagne:#C9A75A;
-    --champagne-deep:#9C7C32;
-    --oxblood:#5A1F22;
-    --slate:#6B655B;
-    --line:#E2DACB;
-    --green:#3F6B4C;
-    --red:#9C3A2E;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bone);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+:root {
+  --ink:        #13110E;
+  --bone:       #F6F2EA;
+  --champ:      #C9A75A;
+  --champ-deep: #9C7C32;
+  --champ-pale: rgba(201,167,90,.10);
+  --oxblood:    #5A1F22;
+  --slate:      #6B655B;
+  --slate-lt:   #9E9890;
+  --line:       #E2DACB;
+  --green:      #3F6B4C;
+  --green-bg:   #E4EDE5;
+  --red:        #9C3A2E;
+  --red-bg:     #F5E2DE;
+  --white:      #FFFFFF;
+  --dark:       #13110E;
+  --dark-mid:   #1A1714;
+  --dark-bd:    #2C2720;
+}
 
-  /* ---- Top bar ---- */
-  header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(246,242,234,.88);backdrop-filter:blur(12px);z-index:50}
-  .bar{display:flex;align-items:center;justify-content:space-between;height:68px}
-  .brand{font-family:'Fraunces',serif;font-size:23px;font-weight:600;letter-spacing:.02em}
-  .brand span{color:var(--champagne-deep)}
-  nav a{color:var(--slate);text-decoration:none;font-size:14px;margin-left:26px;font-weight:500}
-  nav a:hover{color:var(--ink)}
-  @media(max-width:680px){nav{display:none}}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bone);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--champ-deep),var(--champ) 50%,var(--champ-deep));z-index:9999}
 
-  /* ---- Hero ---- */
-  .hero{padding:72px 0 40px}
-  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--champagne-deep);margin-bottom:22px}
-  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(34px,5.4vw,62px);line-height:1.04;letter-spacing:-.01em;max-width:16ch}
-  .hero h1 em{font-style:italic;color:var(--oxblood)}
-  .hero p.lead{font-size:18px;color:var(--slate);max-width:54ch;margin-top:24px}
-  .hero .cta{display:inline-flex;gap:14px;margin-top:34px;flex-wrap:wrap}
-  .btn{display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:2px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:.18s}
-  .btn-dark{background:var(--ink);color:var(--bone)}
-  .btn-dark:hover{background:#000}
-  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
-  .btn-ghost:hover{background:var(--ink);color:var(--bone)}
+/* ─── Screens ─── */
+.screen{min-height:100vh;opacity:0;transition:opacity .38s ease;pointer-events:none}
+.screen.active{opacity:1;pointer-events:auto}
+[hidden]{display:none!important}
 
-  /* ---- Stat strip ---- */
-  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:34px 0 0}
-  .stat{background:var(--bone);padding:22px 20px}
-  .stat .n{font-family:'Fraunces',serif;font-size:30px;font-weight:500}
-  .stat .n.up{color:var(--green)} .stat .n.down{color:var(--red)}
-  .stat .l{font-size:12.5px;color:var(--slate);margin-top:4px}
-  @media(max-width:680px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* ─── Shared ─── */
+.wrap{max-width:1120px;margin:0 auto;padding:0 32px}
 
-  /* ---- Section ---- */
-  section{padding:64px 0;border-top:1px solid var(--line)}
-  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:34px}
-  .sec-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--champagne-deep)}
-  .sec-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:30px}
-  .sec-head p{color:var(--slate);font-size:15px;margin-left:auto;max-width:40ch;text-align:right}
-  @media(max-width:680px){.sec-head{flex-direction:column;gap:6px}.sec-head p{text-align:left;margin-left:0}}
 
-  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
-  @media(max-width:880px){.grid2{grid-template-columns:1fr;gap:30px}}
-  .chart-card{background:#fff;border:1px solid var(--line);padding:24px}
-  .chart-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
-  .chart-card .sub{font-size:12.5px;color:var(--slate);margin-bottom:18px}
-  .chart-box{position:relative;height:280px}
+/* ══════════════════════════════════════════
+   SCREEN 1 — UPLOAD
+══════════════════════════════════════════ */
+#su{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px 48px;position:relative}
 
-  .findings{display:flex;flex-direction:column;gap:0}
-  .finding{padding:20px 0;border-bottom:1px solid var(--line)}
-  .finding:first-child{padding-top:0}
-  .finding .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:2px;display:inline-block;margin-bottom:10px}
-  .tag.risk{background:#F5E3DF;color:var(--red)}
-  .tag.strength{background:#E2EBE3;color:var(--green)}
-  .tag.signal{background:#F2E9D4;color:var(--champagne-deep)}
-  .finding h4{font-family:'Fraunces',serif;font-size:19px;font-weight:500;margin-bottom:6px}
-  .finding p{font-size:14.5px;color:var(--slate)}
+.su-brand{position:absolute;top:28px;left:36px;display:flex;align-items:baseline;gap:12px}
+.su-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:.02em}
+.su-logo .g{color:var(--champ-deep)}
+.su-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--slate-lt)}
 
-  /* ---- Segments table ---- */
-  .seg-table{width:100%;border-collapse:collapse;font-size:14.5px}
-  .seg-table th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate);font-weight:500;padding:0 0 12px;border-bottom:1px solid var(--ink)}
-  .seg-table td{padding:14px 0;border-bottom:1px solid var(--line)}
-  .seg-table .num{font-family:'JetBrains Mono',monospace;text-align:right}
-  .pos{color:var(--green);font-weight:500}.neg{color:var(--red);font-weight:500}
+.su-center{width:100%;max-width:580px;text-align:center}
+.su-eye{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--champ-deep);margin-bottom:22px}
+.su-h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(36px,6vw,58px);line-height:1.05;letter-spacing:-.015em;margin-bottom:20px}
+.su-h1 em{font-style:italic;color:var(--oxblood)}
+.su-lead{font-size:16px;color:var(--slate);max-width:46ch;margin:0 auto 40px;line-height:1.68}
 
-  /* ---- Chatbot ---- */
-  #ask{background:var(--ink);color:var(--bone)}
-  #ask .sec-head h2{color:var(--bone)}
-  #ask .sec-num{color:var(--champagne)}
-  #ask .sec-head p{color:#A9A296}
-  .chat{background:#1C1915;border:1px solid #2E2A24;border-radius:4px;overflow:hidden;max-width:760px;margin:0 auto}
-  .chat-head{padding:16px 22px;border-bottom:1px solid #2E2A24;display:flex;align-items:center;gap:10px}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--champagne)}
-  .chat-head .t{font-size:13px;font-weight:600}
-  .chat-head .s{font-size:11.5px;color:#8B8478;font-family:'JetBrains Mono',monospace;margin-left:auto}
-  .chat-log{padding:22px;height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
-  .msg{max-width:84%;font-size:14.5px;line-height:1.55}
-  .msg.user{align-self:flex-end;background:var(--champagne);color:var(--ink);padding:11px 16px;border-radius:14px 14px 2px 14px;font-weight:500}
-  .msg.bot{align-self:flex-start;color:#E8E3D8}
-  .msg.bot .who{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--champagne);margin-bottom:6px}
-  .msg.bot p{margin-bottom:8px}.msg.bot p:last-child{margin-bottom:0}
-  .msg.bot strong{color:#fff}
-  .typing{display:flex;gap:4px;padding:4px 0}
-  .typing span{width:6px;height:6px;border-radius:50%;background:#8B8478;animation:blink 1.2s infinite}
-  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-  @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
-  .chat-input{display:flex;gap:10px;padding:16px 22px;border-top:1px solid #2E2A24}
-  .chat-input input{flex:1;background:#13110E;border:1px solid #2E2A24;color:var(--bone);padding:12px 15px;border-radius:3px;font-family:'Inter',sans-serif;font-size:14.5px;outline:none}
-  .chat-input input:focus{border-color:var(--champagne)}
-  .chat-input button{background:var(--champagne);color:var(--ink);border:none;padding:0 20px;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer}
-  .chat-input button:disabled{opacity:.5;cursor:not-allowed}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px auto 0;max-width:760px}
-  .chip{background:transparent;border:1px solid #3A352E;color:#C7C0B3;font-size:12.5px;padding:7px 13px;border-radius:20px;cursor:pointer;transition:.15s}
-  .chip:hover{border-color:var(--champagne);color:var(--champagne)}
+/* Drop zone */
+.drop{border:1.5px dashed var(--champ);border-radius:4px;padding:48px 32px;cursor:pointer;transition:background .18s,border-color .18s;position:relative;background:rgba(201,167,90,.04)}
+.drop:hover,.drop.over{background:rgba(201,167,90,.11);border-color:var(--champ-deep)}
+.drop input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-icon{color:var(--champ);margin-bottom:18px;display:flex;justify-content:center}
+.drop-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;margin-bottom:6px}
+.drop-sub{font-size:14px;color:var(--slate);margin-bottom:16px}
+.drop-sub .lnk{color:var(--champ-deep);text-decoration:underline;text-underline-offset:3px}
+.drop-fmt{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-lt)}
 
-  /* ---- Footer ---- */
-  footer{border-top:1px solid var(--line);padding:40px 0;font-size:13px;color:var(--slate)}
-  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
-  .disc{font-size:12px;max-width:60ch;margin-top:14px;color:#A39C8F}
-  a.inline{color:var(--champagne-deep);text-decoration:none;border-bottom:1px solid var(--line)}
+.su-feats{display:flex;justify-content:center;gap:28px;margin-top:36px;flex-wrap:wrap}
+.feat{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--slate)}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:var(--champ);flex-shrink:0}
+.su-err{margin-top:18px;font-size:12.5px;color:var(--red);min-height:18px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.su-foot{position:absolute;bottom:24px;right:36px;font-size:12px;color:var(--slate-lt)}
+
+
+/* ══════════════════════════════════════════
+   SCREEN 2 — LOADING
+══════════════════════════════════════════ */
+#sl{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bone)}
+.sl-brand{font-family:'Fraunces',serif;font-size:21px;font-weight:600;letter-spacing:.02em;margin-bottom:72px}
+.sl-brand .g{color:var(--champ-deep)}
+.sl-center{text-align:center;width:300px}
+.sl-file{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--slate-lt);margin-bottom:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl-track{width:100%;height:2px;background:rgba(201,167,90,.2);border-radius:1px;overflow:hidden;margin-bottom:26px}
+.sl-fill{height:100%;background:var(--champ);width:0%;transition:width .5s ease;border-radius:1px}
+.sl-h2{font-family:'Fraunces',serif;font-size:26px;font-weight:400;font-style:italic;margin-bottom:12px}
+.sl-msg{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-lt);transition:opacity .3s;min-height:18px}
+.sl-dots{display:flex;justify-content:center;gap:6px;margin-top:22px}
+.sl-dots span{width:5px;height:5px;border-radius:50%;background:var(--champ);animation:ld 1.4s infinite}
+.sl-dots span:nth-child(2){animation-delay:.2s}
+.sl-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,60%,100%{opacity:.2;transform:scale(.8)}30%{opacity:1;transform:scale(1.1)}}
+
+
+/* ══════════════════════════════════════════
+   SCREEN 3 — ANALYSIS
+══════════════════════════════════════════ */
+#sa{display:block;background:var(--bone)}
+
+/* Header */
+.sa-hdr{position:sticky;top:3px;z-index:100;border-bottom:1px solid var(--line);background:rgba(246,242,234,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.sa-bar{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px;margin:0 auto;padding:0 32px}
+.sa-logo{font-family:'Fraunces',serif;font-size:21px;font-weight:600;letter-spacing:.02em;cursor:pointer}
+.sa-logo .g{color:var(--champ-deep)}
+.sa-nav{display:flex;align-items:center}
+.sa-nav a{color:var(--slate);text-decoration:none;font-size:13px;font-weight:500;margin-right:22px;transition:color .15s}
+.sa-nav a:hover{color:var(--ink)}
+.btn-new{background:transparent;border:1.5px solid var(--line);color:var(--slate);padding:7px 14px;border-radius:2px;font-size:12px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.01em}
+.btn-new:hover{border-color:var(--ink);color:var(--ink)}
+@media(max-width:700px){.sa-nav a{display:none}}
+
+/* Report hero */
+.rpt-hero{border-bottom:1px solid var(--line);padding:48px 0 40px}
+.rpt-meta{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.rpt-badge{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--champ-deep);background:rgba(201,167,90,.12);padding:4px 10px;border-radius:2px}
+.rpt-period,.rpt-unit{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--slate-lt)}
+.rpt-company{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(28px,4vw,48px);line-height:1.07;letter-spacing:-.015em;margin-bottom:16px}
+.rpt-summary{font-size:16px;color:var(--slate);max-width:70ch;line-height:1.68}
+
+/* Metrics strip */
+.metrics-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px}
+.mc{background:var(--white);padding:22px 20px;transition:background .18s;cursor:default}
+.mc:hover{background:#FDFBF8}
+.mc-label{font-size:11.5px;color:var(--slate-lt);margin-bottom:6px}
+.mc-main{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+.mc-val{font-family:'Fraunces',serif;font-size:26px;font-weight:500;line-height:1.1;letter-spacing:-.01em}
+.mc-unit{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--slate-lt);letter-spacing:.04em}
+.mc-badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:2px;display:inline-block}
+.b-up{background:var(--green-bg);color:var(--green)}
+.b-dn{background:var(--red-bg);color:var(--red)}
+.b-mar{background:rgba(201,167,90,.13);color:var(--champ-deep)}
+@media(max-width:680px){.metrics-strip{grid-template-columns:1fr 1fr}}
+
+/* Sections */
+.asec{padding:64px 0;border-top:1px solid var(--line)}
+.sec-hd{display:flex;align-items:baseline;gap:18px;margin-bottom:40px}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--champ-deep);flex-shrink:0}
+.sec-hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:30px;line-height:1.15}
+.sec-hd p{color:var(--slate);font-size:14px;margin-left:auto;max-width:40ch;text-align:right;line-height:1.55}
+@media(max-width:680px){.sec-hd{flex-direction:column;gap:6px}.sec-hd p{text-align:left;margin-left:0}}
+
+/* Ratios */
+.ratios-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:28px}
+.rc{background:var(--white);padding:18px 16px}
+.rc-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;margin-bottom:4px}
+.rc-lbl{font-size:11.5px;color:var(--slate-lt)}
+
+/* Charts */
+.charts-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:24px}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--white);border:1px solid var(--line);padding:26px}
+.chart-card h3{font-size:13px;font-weight:600;margin-bottom:4px}
+.chart-card .sub{font-size:11.5px;color:var(--slate-lt);margin-bottom:18px;line-height:1.5}
+.chart-box{position:relative;height:280px}
+
+/* Insights */
+.ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 52px}
+@media(max-width:900px){.ins-grid{grid-template-columns:1fr}}
+.ins{padding:22px 0;border-bottom:1px solid var(--line)}
+.ins:first-child{padding-top:0}
+.ins .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:2px;display:inline-block;margin-bottom:12px;font-weight:500}
+.t-str{background:var(--green-bg);color:var(--green)}
+.t-rsk{background:var(--red-bg);color:var(--red)}
+.t-sig{background:#F2E9D4;color:var(--champ-deep)}
+.ins h4{font-family:'Fraunces',serif;font-size:19px;font-weight:500;line-height:1.25;margin-bottom:8px}
+.ins p{font-size:14px;color:var(--slate);line-height:1.65}
+
+/* Chat */
+.chat-sec{background:var(--dark);border-top:none}
+.chat-inner{max-width:1120px;margin:0 auto;padding:64px 32px}
+.chat-sec .sec-hd h2{color:var(--bone)}
+.chat-sec .sec-num{color:var(--champ)}
+.chat-sec .sec-hd p{color:#8A8480}
+.chat-box{background:var(--dark-mid);border:1px solid var(--dark-bd);border-radius:4px;overflow:hidden;max-width:760px;margin:0 auto;box-shadow:0 28px 72px rgba(0,0,0,.45)}
+.c-head{padding:15px 22px;border-bottom:1px solid var(--dark-bd);background:#111009;display:flex;align-items:center;gap:10px}
+.c-dot{width:8px;height:8px;border-radius:50%;background:var(--champ);flex-shrink:0}
+.c-head .t{font-size:13px;font-weight:600;color:var(--bone)}
+.c-doc{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#55504A;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.c-log{padding:22px;height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth}
+.c-log::-webkit-scrollbar{width:3px}
+.c-log::-webkit-scrollbar-track{background:transparent}
+.c-log::-webkit-scrollbar-thumb{background:var(--dark-bd);border-radius:2px}
+.msg{max-width:88%;font-size:14px;line-height:1.65}
+.msg.user{align-self:flex-end;background:var(--champ);color:var(--ink);padding:11px 16px;border-radius:16px 16px 3px 16px;font-weight:500}
+.msg.bot{align-self:flex-start;color:#D6D0C8}
+.msg.bot .who{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--champ);margin-bottom:8px;opacity:.85}
+.msg.bot p{margin-bottom:8px}
+.msg.bot p:last-child{margin-bottom:0}
+.msg.bot strong{color:var(--bone)}
+.typing{display:flex;gap:5px;padding:5px 0;align-items:center}
+.typing span{width:5px;height:5px;border-radius:50%;background:#3A3530;animation:tp 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tp{0%,60%,100%{opacity:.2;transform:scale(.85)}30%{opacity:1;transform:scale(1.15)}}
+.c-inp{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--dark-bd);background:#111009}
+.c-inp input{flex:1;background:var(--dark-mid);border:1px solid var(--dark-bd);color:var(--bone);padding:11px 15px;border-radius:3px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .15s}
+.c-inp input::placeholder{color:#38332E}
+.c-inp input:focus{border-color:var(--champ)}
+.c-inp button{background:var(--champ);color:var(--ink);border:none;padding:0 20px;border-radius:3px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s}
+.c-inp button:hover{background:#D4B462}
+.c-inp button:disabled{opacity:.4;cursor:not-allowed}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px auto 0;max-width:760px}
+.chip{background:transparent;border:1px solid #2A2520;color:#9A9490;font-size:12px;font-family:'Inter',sans-serif;padding:7px 13px;border-radius:20px;cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--champ);color:var(--champ)}
+
+/* Footer */
+.sa-foot{border-top:1px solid var(--line);padding:36px 0}
+.foot-in{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+.foot-brand{font-family:'Fraunces',serif;font-size:17px;font-weight:500;margin-bottom:6px}
+.foot-disc{font-size:12px;color:#A39C8F;max-width:54ch;line-height:1.62;margin-top:8px}
+.foot-r{font-size:13px;color:var(--slate);text-align:right}
+
+/* Reveal */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.rv.in{opacity:1;transform:none}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap bar">
-    <div class="brand">Lumi<span>è</span>re</div>
-    <nav>
-      <a href="#dashboard">Dashboard</a>
-      <a href="#segments">Segments</a>
-      <a href="#findings">Findings</a>
-      <a href="#ask">Ask the Agent</a>
-    </nav>
-  </div>
-</header>
 
-<div class="wrap">
+<!-- ═══════════════════════════════════════════
+     SCREEN 1 ─ UPLOAD
+════════════════════════════════════════════ -->
+<div class="screen active" id="su">
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="eyebrow">Earnings Intelligence · LVMH Moët Hennessy Louis Vuitton</div>
-    <h1>Executives reveal strategy on earnings calls. <em>Most people never listen.</em></h1>
-    <p class="lead">Lumière reads LVMH's quarterly results, tracks the signals that move the business, and lets you interrogate them in plain English — turning hours of analyst work into a 30-second conversation.</p>
-    <div class="cta">
-      <a href="#ask" class="btn btn-dark">Ask the agent →</a>
-      <a href="#dashboard" class="btn btn-ghost">See the data</a>
-    </div>
-
-    <div class="strip">
-      <div class="stat"><div class="n">€58.1B</div><div class="l">9M 2025 revenue</div></div>
-      <div class="stat"><div class="n up">+1%</div><div class="l">Q3 2025 organic growth</div></div>
-      <div class="stat"><div class="n down">−4%</div><div class="l">9M 2025 reported</div></div>
-      <div class="stat"><div class="n">48%</div><div class="l">Fashion &amp; Leather share</div></div>
-    </div>
+  <div class="su-brand">
+    <div class="su-logo">Lumi<span class="g">è</span>re</div>
+    <div class="su-tag">Financial Intelligence</div>
   </div>
 
-  <!-- DASHBOARD -->
-  <section id="dashboard">
-    <div class="sec-head">
-      <span class="sec-num">01</span>
-      <h2>The trend the numbers tell</h2>
-      <p>Reported revenue softened through 2024–25, but Q3 2025 marked the first return to organic growth this year.</p>
-    </div>
-    <div class="grid2">
-      <div class="chart-card">
-        <h3>Quarterly revenue &amp; organic growth</h3>
-        <div class="sub">Revenue in € billions (bars) · organic growth % YoY (line)</div>
-        <div class="chart-box"><canvas id="revChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Where growth came from — Q3 2025</h3>
-        <div class="sub">Organic growth % by business group, nine-month basis</div>
-        <div class="chart-box"><canvas id="segChart"></canvas></div>
-      </div>
-    </div>
-  </section>
+  <div class="su-center">
+    <p class="su-eye">Instant analysis · Any financial document · Ask anything</p>
 
-  <!-- SEGMENTS -->
-  <section id="segments">
-    <div class="sec-head">
-      <span class="sec-num">02</span>
-      <h2>Division by division</h2>
-      <p>Fashion &amp; Leather is the profit engine — and the swing factor for the whole group.</p>
-    </div>
-    <table class="seg-table">
-      <thead><tr><th>Business group</th><th class="num">FY2024 revenue</th><th class="num">9M 2025 organic</th><th>Read</th></tr></thead>
-      <tbody>
-        <tr><td>Fashion &amp; Leather Goods</td><td class="num">€41.1B</td><td class="num neg">−6%</td><td>Largest division; decline slowed in Q3</td></tr>
-        <tr><td>Selective Retailing (Sephora, DFS)</td><td class="num">€18.3B</td><td class="num pos">+3%</td><td>Sephora the standout; DFS recovering</td></tr>
-        <tr><td>Perfumes &amp; Cosmetics</td><td class="num">€8.4B</td><td class="num">Stable</td><td>Dior &amp; Guerlain launches holding demand</td></tr>
-        <tr><td>Watches &amp; Jewelry</td><td class="num">€10.6B</td><td class="num pos">+1%</td><td>Tiffany &amp; Bvlgari driving the segment</td></tr>
-        <tr><td>Wines &amp; Spirits</td><td class="num">€5.9B</td><td class="num neg">−4%</td><td>Most challenged; cognac weakness in US/China</td></tr>
-      </tbody>
-    </table>
-  </section>
+    <h1 class="su-h1">Your statements,<br><em>decoded.</em></h1>
 
-  <!-- FINDINGS -->
-  <section id="findings">
-    <div class="sec-head">
-      <span class="sec-num">03</span>
-      <h2>What the agent flagged</h2>
-      <p>Strategic signals pulled from the transcript — not just the headline number.</p>
+    <p class="su-lead">Upload a P&amp;L, Balance Sheet, Annual Report, or any financial filing. Get an instant AI analysis with key metrics, trends, and insights — then ask questions in plain English.</p>
+
+    <div class="drop" id="dropZone">
+      <div class="drop-icon">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <circle cx="26" cy="26" r="24" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M26 34V20M19 27l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="drop-title">Drop your document here</div>
+      <div class="drop-sub">or <span class="lnk">browse files</span></div>
+      <div class="drop-fmt">PDF · JPG · PNG · WEBP &nbsp;·&nbsp; Max 8 MB</div>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
     </div>
-    <div class="grid2">
-      <div class="findings">
-        <div class="finding">
-          <span class="tag signal">Turning point</span>
-          <h4>Q3 2025 broke a two-quarter decline</h4>
-          <p>After −3% (Q1) and −4% (Q2), Q3 organic growth turned positive at +1% — the first growth of the year, touching nearly every division. The business stopped getting worse.</p>
+
+    <div class="su-err" id="suErr"></div>
+
+    <div class="su-feats">
+      <div class="feat"><span class="feat-dot"></span><span>P&amp;L, Balance Sheet, Cash Flow</span></div>
+      <div class="feat"><span class="feat-dot"></span><span>Indian &amp; international formats</span></div>
+      <div class="feat"><span class="feat-dot"></span><span>Grounded AI chat</span></div>
+    </div>
+  </div>
+
+  <div class="su-foot">Designed by Sakshi Pednekar</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2 ─ LOADING
+════════════════════════════════════════════ -->
+<div class="screen" id="sl" hidden>
+  <div class="sl-brand">Lumi<span class="g">è</span>re</div>
+  <div class="sl-center">
+    <div class="sl-file" id="slFile">document.pdf</div>
+    <div class="sl-track"><div class="sl-fill" id="slFill"></div></div>
+    <div class="sl-h2">Analysing your statements…</div>
+    <div class="sl-msg" id="slMsg">Reading your document</div>
+    <div class="sl-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3 ─ ANALYSIS
+════════════════════════════════════════════ -->
+<div class="screen" id="sa" hidden>
+
+  <!-- Sticky header -->
+  <header class="sa-hdr">
+    <div class="sa-bar">
+      <div class="sa-logo" id="saHome">Lumi<span class="g">è</span>re</div>
+      <div class="sa-nav">
+        <a href="#s-metrics">Metrics</a>
+        <a href="#s-trends">Trends</a>
+        <a href="#s-insights">Insights</a>
+        <a href="#s-chat">Ask</a>
+        <button class="btn-new" id="btnNew">↑ New analysis</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Report hero -->
+    <div class="rpt-hero">
+      <div class="rpt-meta">
+        <span class="rpt-badge" id="rptType">—</span>
+        <span class="rpt-period" id="rptPeriod">—</span>
+        <span class="rpt-unit"   id="rptUnit">—</span>
+      </div>
+      <div class="rpt-company" id="rptCompany">Loading…</div>
+      <div class="rpt-summary" id="rptSummary"></div>
+    </div>
+
+    <!-- 01 Metrics -->
+    <section class="asec" id="s-metrics">
+      <div class="sec-hd rv">
+        <span class="sec-num">01</span>
+        <h2>Key metrics</h2>
+        <p>Core financial figures extracted from your document.</p>
+      </div>
+      <div class="metrics-strip rv" id="metricsStrip"></div>
+      <div id="ratiosWrap" hidden>
+        <div class="ratios-grid" id="ratiosGrid"></div>
+      </div>
+    </section>
+
+    <!-- 02 Trends -->
+    <section class="asec" id="s-trends" hidden>
+      <div class="sec-hd rv">
+        <span class="sec-num">02</span>
+        <h2>Trends &amp; breakdown</h2>
+        <p>Historical performance and segment view from your document.</p>
+      </div>
+      <div class="charts-grid rv" id="chartsGrid">
+        <div class="chart-card" id="cHist" hidden>
+          <h3>Revenue &amp; Profit trend</h3>
+          <div class="sub" id="histSub">Multi-period view from document</div>
+          <div class="chart-box"><canvas id="histChart"></canvas></div>
         </div>
-        <div class="finding">
-          <span class="tag risk">Headwind</span>
-          <h4>A strong euro is masking real demand</h4>
-          <p>Currency shaved ~5 points off Q3 growth. Reported revenue (−4%) looks worse than underlying local-currency demand, which is recovering — especially in China.</p>
-        </div>
-        <div class="finding">
-          <span class="tag risk">Watch</span>
-          <h4>Price-hike fatigue is real</h4>
-          <p>Repeated price increases plus US trade uncertainty pushed back demand for high-priced handbags in Asia and the US. Pricing power has limits, and LVMH is testing them.</p>
+        <div class="chart-card" id="cSeg" hidden>
+          <h3>Segment / Product breakdown</h3>
+          <div class="sub" id="segSub">By segment or geography</div>
+          <div class="chart-box"><canvas id="segChart"></canvas></div>
         </div>
       </div>
-      <div class="findings">
-        <div class="finding">
-          <span class="tag strength">Strength</span>
-          <h4>Selective Retailing is the quiet winner</h4>
-          <p>Sephora delivered a "remarkable performance" (+7% in Q3) while the fashion engine stalled — proof the portfolio model cushions single-division weakness.</p>
-        </div>
-        <div class="finding">
-          <span class="tag strength">Strength</span>
-          <h4>China is turning the corner</h4>
-          <p>Asia ex-Japan improved meaningfully, with Louis Vuitton and Dior both seeing better local-customer momentum — the single most important regional signal for the group.</p>
-        </div>
-        <div class="finding">
-          <span class="tag signal">Management tone</span>
-          <h4>From "resilience" to "desirability"</h4>
-          <p>Leadership language shifted toward continuously enhancing brand desirability and retail excellence — a tell that the strategy is defending pricing power, not chasing volume.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- CHATBOT -->
-  <section id="ask">
-    <div class="wrap" style="padding:0">
-      <div class="sec-head">
+    <!-- 03 Insights -->
+    <section class="asec" id="s-insights">
+      <div class="sec-hd rv">
+        <span class="sec-num">03</span>
+        <h2>What Lumière flagged</h2>
+        <p>Signals, risks, and opportunities from your document.</p>
+      </div>
+      <div class="ins-grid rv" id="insGrid"></div>
+    </section>
+
+  </div><!-- /wrap -->
+
+  <!-- 04 Chat -->
+  <section class="asec chat-sec" id="s-chat">
+    <div class="chat-inner">
+      <div class="sec-hd">
         <span class="sec-num">04</span>
-        <h2>Ask the agent</h2>
-        <p>Powered by live AI, grounded in LVMH's real 2023–2025 results.</p>
+        <h2>Ask about this document</h2>
+        <p>Every answer is grounded in your uploaded file.</p>
       </div>
-
-      <div class="chat">
-        <div class="chat-head">
-          <span class="dot"></span>
+      <div class="chat-box">
+        <div class="c-head">
+          <span class="c-dot"></span>
           <span class="t">Lumière Agent</span>
-          <span class="s">LVMH · FY2023–9M2025</span>
+          <span class="c-doc" id="cDocName">document.pdf</span>
         </div>
-        <div class="chat-log" id="log">
+        <div class="c-log" id="cLog">
           <div class="msg bot">
             <div class="who">Lumière</div>
-            <p>Ask me anything about LVMH's recent performance — revenue trends, why sales softened, how China is doing, or what's driving each division. I'll answer from the real earnings data.</p>
+            <p>I've analysed your document. Ask me anything about the financial data — revenue, margins, debt, risks, or specific line items.</p>
           </div>
         </div>
-        <div class="chat-input">
-          <input id="q" type="text" placeholder="e.g. Why did revenue drop in 2025?" autocomplete="off">
-          <button id="send">Ask</button>
+        <div class="c-inp">
+          <input type="text" id="cInput" placeholder="e.g. What drove the change in net profit?" autocomplete="off">
+          <button id="cSend">Ask</button>
         </div>
       </div>
-
       <div class="chips" id="chips">
-        <button class="chip">How did revenue trend over the last two years?</button>
-        <button class="chip">Why did sales drop?</button>
-        <button class="chip">How is China performing?</button>
-        <button class="chip">Which division is strongest?</button>
-        <button class="chip">Is the price-hike strategy working?</button>
+        <button class="chip">What is the revenue growth trend?</button>
+        <button class="chip">What are the key risks?</button>
+        <button class="chip">How profitable is this business?</button>
+        <button class="chip">What's the debt situation?</button>
+        <button class="chip">What should I watch closely?</button>
       </div>
     </div>
   </section>
+
+  <footer class="sa-foot">
+    <div class="wrap foot-in">
+      <div>
+        <div class="foot-brand">Lumière</div>
+        <div class="foot-disc">AI-powered financial statement analysis. Insights are generated from your uploaded document using Gemini AI. Not financial advice — verify key figures against source documents.</div>
+      </div>
+      <div class="foot-r">Designed &amp; built by<br>Sakshi Pednekar</div>
+    </div>
+  </footer>
 
 </div>
 
-<footer>
-  <div class="wrap foot">
-    <div>
-      <strong>Lumière</strong> · Earnings Intelligence Agent
-      <div class="disc">Built as an independent strategy &amp; analytics demonstration. All figures sourced from LVMH's published quarterly results (FY2023–9M 2025). Not affiliated with or endorsed by LVMH. For illustrative purposes.</div>
-    </div>
-    <div>Designed &amp; built by Sakshi Pednekar</div>
-  </div>
-</footer>
 
 <script>
-/* ----------  CHARTS  ---------- */
-const ink='#13110E', champ='#C9A75A', oxblood='#5A1F22', slate='#6B655B', line='#E2DAcb';
-Chart.defaults.font.family="'Inter',sans-serif";
-Chart.defaults.color=slate;
+/* ══════════════════════════════════════
+   GLOBALS
+══════════════════════════════════════ */
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color       = '#6B655B';
 
-new Chart(document.getElementById('revChart'),{
-  data:{
-    labels:['Q3 24','Q4 24','Q1 25','Q2 25','Q3 25'],
-    datasets:[
-      {type:'bar',label:'Revenue (€B)',data:[19.1,23.9,20.3,19.5,18.3],
-       backgroundColor:'rgba(201,167,90,.28)',borderColor:champ,borderWidth:1,yAxisID:'y',order:2},
-      {type:'line',label:'Organic growth %',data:[-3,1,-3,-4,1],
-       borderColor:oxblood,backgroundColor:oxblood,borderWidth:2,tension:.3,pointRadius:4,pointBackgroundColor:oxblood,yAxisID:'y1',order:1}
-    ]
-  },
-  options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
-    scales:{
-      y:{position:'left',grid:{color:line},title:{display:true,text:'€B',font:{size:10}}},
-      y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'% organic',font:{size:10}},ticks:{callback:v=>v+'%'}}
-    }
-  }
+let docCtx      = '';   // grounding context for chat
+let docFileName = '';
+let instHist    = null;
+let instSeg     = null;
+
+const COL = {
+  champ:  '#C9A75A',
+  green:  '#3F6B4C',
+  red:    '#9C3A2E',
+  grid:   '#E2DACB',
+  slate:  '#6B655B',
+};
+
+/* ══════════════════════════════════════
+   SCREEN TRANSITIONS
+══════════════════════════════════════ */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function toScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  await sleep(360);
+  document.querySelectorAll('.screen').forEach(s => { s.hidden = true; });
+  const t = document.getElementById(id);
+  t.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('active')));
+}
+
+/* ══════════════════════════════════════
+   LOADING
+══════════════════════════════════════ */
+const MSGS = [
+  'Reading your document',
+  'Extracting financial data',
+  'Identifying key metrics',
+  'Analysing trends & ratios',
+  'Generating insights',
+  'Finalising your report',
+];
+let _msgT = null, _progT = null, _prog = 0;
+
+function startLoading(name) {
+  document.getElementById('slFile').textContent    = name;
+  document.getElementById('cDocName').textContent  = name;
+  docFileName = name;
+
+  let idx = 0;
+  const msgEl = document.getElementById('slMsg');
+  msgEl.textContent = MSGS[0];
+  _msgT = setInterval(() => {
+    idx = Math.min(idx + 1, MSGS.length - 1);
+    msgEl.style.opacity = '0';
+    setTimeout(() => { msgEl.textContent = MSGS[idx]; msgEl.style.opacity = '1'; }, 300);
+  }, 2600);
+
+  _prog = 0;
+  const fill = document.getElementById('slFill');
+  fill.style.width = '0%';
+  _progT = setInterval(() => {
+    const step = _prog < 55 ? 3.5 : _prog < 78 ? 1 : 0.25;
+    _prog = Math.min(_prog + step, 88);
+    fill.style.width = _prog + '%';
+  }, 300);
+}
+
+function stopLoading() {
+  clearInterval(_msgT);
+  clearInterval(_progT);
+  document.getElementById('slFill').style.width = '100%';
+}
+
+/* ══════════════════════════════════════
+   UPLOAD HANDLING
+══════════════════════════════════════ */
+const dropEl  = document.getElementById('dropZone');
+const fileIn  = document.getElementById('fileInput');
+const errEl   = document.getElementById('suErr');
+
+const OK_TYPES = ['application/pdf','image/jpeg','image/png','image/webp'];
+const MAX_SIZE = 8 * 1024 * 1024;
+
+dropEl.addEventListener('dragover',  e => { e.preventDefault(); dropEl.classList.add('over'); });
+dropEl.addEventListener('dragleave', ()  => dropEl.classList.remove('over'));
+dropEl.addEventListener('drop', e => {
+  e.preventDefault();
+  dropEl.classList.remove('over');
+  const f = e.dataTransfer?.files?.[0];
+  if (f) go(f);
 });
+fileIn.addEventListener('change', () => { if (fileIn.files?.[0]) go(fileIn.files[0]); });
 
-new Chart(document.getElementById('segChart'),{
-  type:'bar',
-  data:{
-    labels:['Selective Retail','Watches & Jewelry','Perfumes & Cosm.','Fashion & Leather','Wines & Spirits'],
-    datasets:[{label:'9M 2025 organic %',data:[3,1,0,-6,-4],
-      backgroundColor:[3,1,0,-6,-4].map(v=>v>=0?'#3F6B4C':'#9C3A2E')
-    }]
-  },
-  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{x:{grid:{color:line},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:11.5}}}}
-  }
-});
+function showErr(msg) { errEl.textContent = msg; setTimeout(() => errEl.textContent = '', 6000); }
 
-/* ----------  CHATBOT  ---------- */
-const log=document.getElementById('log'), input=document.getElementById('q'), sendBtn=document.getElementById('send');
-
-function addUser(t){
-  const d=document.createElement('div');d.className='msg user';d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;
-}
-function addBot(html){
-  const d=document.createElement('div');d.className='msg bot';
-  d.innerHTML='<div class="who">Lumière</div>'+html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
-}
-function typing(){
-  const d=document.createElement('div');d.className='msg bot';
-  d.innerHTML='<div class="who">Lumière</div><div class="typing"><span></span><span></span><span></span></div>';
-  log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
-}
-function fmt(t){
-  // minimal markdown: **bold** and paragraph breaks
-  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  return t.split(/\n{2,}|\n/).filter(x=>x.trim()).map(p=>'<p>'+p.trim()+'</p>').join('');
+function go(file) {
+  errEl.textContent = '';
+  if (!OK_TYPES.includes(file.type)) { showErr('Unsupported type. Upload a PDF, JPG, PNG, or WEBP.'); return; }
+  if (file.size > MAX_SIZE)          { showErr('File too large. Max 8 MB.'); return; }
+  startLoading(file.name);
+  toScreen('sl').then(() => analyze(file));
 }
 
-async function ask(question){
-  if(!question.trim())return;
-  addUser(question);
-  input.value='';sendBtn.disabled=true;
-  const t=typing();
-  try{
-    const r=await fetch('/api/ask',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({question})
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function analyze(file) {
+  try {
+    const b64 = await toBase64(file);
+
+    const resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileData: b64, mimeType: file.type, fileName: file.name })
     });
-    const data=await r.json();
-    t.remove();
-    if(data.answer){addBot(fmt(data.answer));}
-    else{addBot('<p>I couldn\u2019t reach the analysis engine just now. Please try again in a moment.</p>');}
-  }catch(e){
-    t.remove();
+
+    const json = await resp.json();
+    if (!resp.ok || json.error) throw new Error(json.error || 'Analysis failed');
+
+    stopLoading();
+    await sleep(280);
+    renderAll(json.analysis);
+    await toScreen('sa');
+
+    requestAnimationFrame(() => {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.07 });
+      document.querySelectorAll('.rv').forEach(el => io.observe(el));
+    });
+
+  } catch (err) {
+    stopLoading();
+    await toScreen('su');
+    showErr('Analysis failed: ' + (err.message || 'Please try again.'));
+  }
+}
+
+/* ══════════════════════════════════════
+   RENDER ALL
+══════════════════════════════════════ */
+const numFmt = (n, d = 1) => n !== null && n !== undefined
+  ? Number(n).toLocaleString('en-IN', { maximumFractionDigits: d })
+  : null;
+
+function renderAll(d) {
+  docCtx = d.context_for_chat || '';
+
+  // Hero
+  document.getElementById('rptCompany').textContent = d.company     || 'Financial Report';
+  document.getElementById('rptPeriod').textContent  = d.period      || '';
+  document.getElementById('rptType').textContent    = d.report_type || 'Document';
+  document.getElementById('rptSummary').textContent = d.summary     || '';
+  const unitTxt = [d.currency, d.currency_unit].filter(Boolean).join(' ');
+  document.getElementById('rptUnit').textContent    = unitTxt ? '· in ' + unitTxt : '';
+
+  // Reset chat greeting
+  document.getElementById('cLog').innerHTML = `
+    <div class="msg bot">
+      <div class="who">Lumière</div>
+      <p>I've analysed <strong>${d.company || 'your document'}</strong> (${d.period || 'reported period'}). Ask me anything — revenue, margins, debt, risks, or specific figures.</p>
+    </div>`;
+
+  renderMetrics(d.metrics, d.currency, d.currency_unit);
+  renderRatios(d.key_ratios);
+  renderCharts(d);
+  renderInsights(d.insights || []);
+}
+
+/* ── Metrics ── */
+function renderMetrics(m, cu, un) {
+  const strip = document.getElementById('metricsStrip');
+  strip.innerHTML = '';
+  if (!m) return;
+
+  const SLOTS = [
+    { k:'revenue',          lFn: v => v.label || 'Revenue',               badgeFn: v => yoy(v.yoy_pct) || mar(v.margin_pct) },
+    { k:'net_profit',       lFn: v => v.label || 'Net Profit / PAT',      badgeFn: v => yoy(v.yoy_pct) || mar(v.margin_pct) },
+    { k:'ebitda',           lFn: ()=> 'EBITDA',                            badgeFn: v => mar(v.margin_pct) },
+    { k:'operating_profit', lFn: v => v.label || 'Operating Profit',      badgeFn: v => yoy(v.yoy_pct) || mar(v.margin_pct) },
+    { k:'gross_profit',     lFn: ()=> 'Gross Profit',                     badgeFn: v => mar(v.margin_pct) },
+    { k:'total_debt',       lFn: v => v.label || 'Total Debt',            badgeFn: ()=> null },
+    { k:'cash',             lFn: v => v.label || 'Cash & Equivalents',    badgeFn: ()=> null },
+    { k:'equity',           lFn: v => v.label || "Shareholders' Equity",  badgeFn: ()=> null },
+    { k:'total_assets',     lFn: ()=> 'Total Assets',                     badgeFn: ()=> null },
+  ];
+
+  let cnt = 0;
+  SLOTS.forEach(s => {
+    const v = m[s.k];
+    if (!v || v.value === null || v.value === undefined) return;
+    const fv = numFmt(v.value);
+    if (!fv) return;
+    const bdg = s.badgeFn(v) || '';
+    const el = document.createElement('div');
+    el.className = 'mc';
+    el.innerHTML = `
+      <div class="mc-label">${s.lFn(v)}</div>
+      <div class="mc-main">
+        <div class="mc-val">${cu ? cu + '\u00A0' : ''}${fv}</div>
+        ${un ? `<div class="mc-unit">${un}</div>` : ''}
+      </div>
+      ${bdg}`;
+    strip.appendChild(el);
+    cnt++;
+  });
+
+  if (!cnt) {
+    strip.innerHTML = '<div class="mc" style="grid-column:1/-1;color:var(--slate-lt);font-size:14px">No quantitative metrics were extracted.</div>';
+  }
+}
+
+function yoy(v) {
+  if (v === null || v === undefined) return '';
+  const cls = v >= 0 ? 'b-up' : 'b-dn';
+  const arr = v >= 0 ? '↑' : '↓';
+  return `<span class="mc-badge ${cls}">${arr} ${Math.abs(v).toFixed(1)}% YoY</span>`;
+}
+function mar(v) {
+  if (v === null || v === undefined) return '';
+  return `<span class="mc-badge b-mar">${Number(v).toFixed(1)}% margin</span>`;
+}
+
+/* ── Ratios ── */
+function renderRatios(r) {
+  const grid = document.getElementById('ratiosGrid');
+  grid.innerHTML = '';
+  if (!r) return;
+
+  const SLOTS = [
+    { k:'net_margin',        l:'Net Margin',       f: v => v.toFixed(1) + '%' },
+    { k:'gross_margin',      l:'Gross Margin',     f: v => v.toFixed(1) + '%' },
+    { k:'roe',               l:'ROE',              f: v => v.toFixed(1) + '%' },
+    { k:'roce',              l:'ROCE',             f: v => v.toFixed(1) + '%' },
+    { k:'debt_equity',       l:'Debt / Equity',    f: v => v.toFixed(2) + 'x' },
+    { k:'current_ratio',     l:'Current Ratio',    f: v => v.toFixed(2) + 'x' },
+    { k:'interest_coverage', l:'Interest Cover',   f: v => v.toFixed(1) + 'x' },
+  ];
+
+  let cnt = 0;
+  SLOTS.forEach(s => {
+    const v = r[s.k];
+    if (v === null || v === undefined) return;
+    const el = document.createElement('div');
+    el.className = 'rc';
+    el.innerHTML = `<div class="rc-val">${s.f(v)}</div><div class="rc-lbl">${s.l}</div>`;
+    grid.appendChild(el);
+    cnt++;
+  });
+
+  document.getElementById('ratiosWrap').hidden = (cnt === 0);
+}
+
+/* ── Charts ── */
+function renderCharts(d) {
+  if (instHist) { instHist.destroy(); instHist = null; }
+  if (instSeg)  { instSeg.destroy();  instSeg  = null; }
+
+  const hist = d.historical_revenue || [];
+  const segs = d.segment_breakdown  || [];
+  const cu   = d.currency          || '';
+  const un   = d.currency_unit     || '';
+
+  // Historical
+  const cardH = document.getElementById('cHist');
+  if (hist.length >= 2) {
+    cardH.hidden = false;
+    document.getElementById('histSub').textContent =
+      `${cu ? cu + ' in ' : ''}${un} · ${hist[0].period} to ${hist[hist.length-1].period}`;
+
+    const labs = hist.map(h => h.period);
+    const revs = hist.map(h => h.revenue);
+    const prft = hist.map(h => h.net_profit);
+    const hasP = prft.some(p => p !== null && p !== undefined);
+
+    const ds = [{
+      type:'bar', label:`Revenue (${un})`,
+      data: revs,
+      backgroundColor:'rgba(201,167,90,.22)', borderColor: COL.champ, borderWidth:1.5,
+      yAxisID:'y', order:2,
+      datalabels:{ display:false }
+    }];
+    if (hasP) ds.push({
+      type:'line', label:`Net Profit (${un})`,
+      data: prft,
+      borderColor:'#5A1F22', backgroundColor:'#5A1F22',
+      borderWidth:2, tension:.35,
+      pointRadius:4, pointBackgroundColor:'#5A1F22', pointBorderColor:'#fff', pointBorderWidth:1.5,
+      yAxisID:'y', order:1,
+      datalabels:{ display:false }
+    });
+
+    instHist = new Chart(document.getElementById('histChart'), {
+      data:{ labels: labs, datasets: ds },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ labels:{ boxWidth:10, font:{ size:11 }, padding:14 } },
+          tooltip:{ callbacks:{ label: c => `  ${c.dataset.label}: ${cu} ${numFmt(c.raw)} ${un}` } }
+        },
+        scales:{
+          x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } },
+          y:{ grid:{ color: COL.grid }, ticks:{ font:{ size:10.5 }, callback: v => numFmt(v,0) } }
+        }
+      }
+    });
+  } else { cardH.hidden = true; }
+
+  // Segments
+  const cardS = document.getElementById('cSeg');
+  if (segs.length >= 1) {
+    cardS.hidden = false;
+    document.getElementById('segSub').textContent =
+      `${cu ? cu + ' in ' : ''}${un || 'units'} · ${segs.length} segment${segs.length > 1 ? 's' : ''}`;
+
+    const sLbls   = segs.map(s => s.name);
+    const sVals   = segs.map(s => s.value);
+    const sYoys   = segs.map(s => s.yoy_pct);
+    const sBgs    = sYoys.map(y => y === null ? 'rgba(201,167,90,.18)' : y >= 0 ? 'rgba(63,107,76,.18)' : 'rgba(156,58,46,.16)');
+    const sBords  = sYoys.map(y => y === null ? COL.champ : y >= 0 ? COL.green : COL.red);
+
+    instSeg = new Chart(document.getElementById('segChart'), {
+      type:'bar',
+      data:{ labels: sLbls, datasets:[{
+        data: sVals, backgroundColor: sBgs, borderColor: sBords, borderWidth:1.5,
+        datalabels:{
+          anchor:'end', align:'end', offset:4,
+          color:'#8A8278', font:{ size:9.5, family:"'JetBrains Mono',monospace" },
+          formatter: v => numFmt(v,0)
+        }
+      }]},
+      options:{
+        indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        layout:{ padding:{ right:52 } },
+        plugins:{
+          legend:{ display:false },
+          tooltip:{ callbacks:{ label: c => `  ${cu} ${numFmt(c.raw)} ${un}` } }
+        },
+        scales:{
+          x:{ grid:{ color: COL.grid }, ticks:{ font:{ size:10.5 }, callback: v => numFmt(v,0) } },
+          y:{ grid:{ display:false }, ticks:{ font:{ size:11 } } }
+        }
+      }
+    });
+  } else { cardS.hidden = true; }
+
+  // Show/hide section and adjust grid
+  const sec  = document.getElementById('s-trends');
+  const grid = document.getElementById('chartsGrid');
+  const any  = !cardH.hidden || !cardS.hidden;
+  sec.hidden = !any;
+  if (any) {
+    const both = !cardH.hidden && !cardS.hidden;
+    grid.style.gridTemplateColumns = both ? '1.35fr .65fr' : '1fr';
+  }
+}
+
+/* ── Insights ── */
+function renderInsights(arr) {
+  const g = document.getElementById('insGrid');
+  g.innerHTML = '';
+  if (!arr.length) {
+    g.innerHTML = '<div style="color:var(--slate-lt);font-size:14px">No specific insights were identified.</div>';
+    return;
+  }
+  const TAG = { strength:'t-str', risk:'t-rsk', signal:'t-sig' };
+  const half = Math.ceil(arr.length / 2);
+  [arr.slice(0, half), arr.slice(half)].forEach(col => {
+    const c = document.createElement('div');
+    col.forEach((ins, i) => {
+      const tagCls = TAG[ins.type] || 't-sig';
+      const el = document.createElement('div');
+      el.className = 'ins';
+      if (i === 0) el.style.paddingTop = '0';
+      el.innerHTML = `
+        <span class="tag ${tagCls}">${ins.type}</span>
+        <h4>${ins.title || ''}</h4>
+        <p>${ins.detail || ''}</p>`;
+      c.appendChild(el);
+    });
+    g.appendChild(c);
+  });
+}
+
+/* ══════════════════════════════════════
+   CHAT
+══════════════════════════════════════ */
+const cLog   = document.getElementById('cLog');
+const cInput = document.getElementById('cInput');
+const cSend  = document.getElementById('cSend');
+
+function addUser(t) {
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.textContent = t;
+  cLog.appendChild(d);
+  cLog.scrollTop = cLog.scrollHeight;
+}
+function addBot(html) {
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.innerHTML = '<div class="who">Lumière</div>' + html;
+  cLog.appendChild(d);
+  cLog.scrollTop = cLog.scrollHeight;
+  return d;
+}
+function addTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.innerHTML = '<div class="who">Lumière</div><div class="typing"><span></span><span></span><span></span></div>';
+  cLog.appendChild(d);
+  cLog.scrollTop = cLog.scrollHeight;
+  return d;
+}
+function mdFmt(t) {
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return t.split(/\n{2,}|\n/).filter(s => s.trim()).map(p => '<p>' + p.trim() + '</p>').join('');
+}
+
+async function ask(q) {
+  if (!q.trim()) return;
+  addUser(q);
+  cInput.value = '';
+  cSend.disabled = true;
+  const loader = addTyping();
+  try {
+    const r = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, context: docCtx })
+    });
+    const data = await r.json();
+    loader.remove();
+    addBot(data.answer ? mdFmt(data.answer) : '<p>Couldn\'t generate an answer. Please try rephrasing.</p>');
+  } catch {
+    loader.remove();
     addBot('<p>Connection issue — please try again.</p>');
   }
-  sendBtn.disabled=false;input.focus();
+  cSend.disabled = false;
+  cInput.focus();
 }
 
-sendBtn.onclick=()=>ask(input.value);
-input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value)});
-document.getElementById('chips').addEventListener('click',e=>{
-  if(e.target.classList.contains('chip'))ask(e.target.textContent);
+cSend.onclick = () => ask(cInput.value);
+cInput.addEventListener('keydown', e => { if (e.key === 'Enter') ask(cInput.value); });
+document.getElementById('chips').addEventListener('click', e => {
+  if (e.target.classList.contains('chip')) ask(e.target.textContent);
 });
+
+/* ══════════════════════════════════════
+   RESET
+══════════════════════════════════════ */
+function reset() {
+  docCtx = '';
+  if (instHist) { instHist.destroy(); instHist = null; }
+  if (instSeg)  { instSeg.destroy();  instSeg  = null; }
+  fileIn.value = '';
+  errEl.textContent = '';
+  toScreen('su');
+}
+
+document.getElementById('btnNew').addEventListener('click', reset);
+document.getElementById('saHome').addEventListener('click', reset);
 </script>
 </body>
 </html>
