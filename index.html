@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumière · LVMH Earnings Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#13110E;
+    --bone:#F6F2EA;
+    --champagne:#C9A75A;
+    --champagne-deep:#9C7C32;
+    --oxblood:#5A1F22;
+    --slate:#6B655B;
+    --line:#E2DACB;
+    --green:#3F6B4C;
+    --red:#9C3A2E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bone);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+
+  /* ---- Top bar ---- */
+  header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(246,242,234,.88);backdrop-filter:blur(12px);z-index:50}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .brand{font-family:'Fraunces',serif;font-size:23px;font-weight:600;letter-spacing:.02em}
+  .brand span{color:var(--champagne-deep)}
+  nav a{color:var(--slate);text-decoration:none;font-size:14px;margin-left:26px;font-weight:500}
+  nav a:hover{color:var(--ink)}
+  @media(max-width:680px){nav{display:none}}
+
+  /* ---- Hero ---- */
+  .hero{padding:72px 0 40px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--champagne-deep);margin-bottom:22px}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(34px,5.4vw,62px);line-height:1.04;letter-spacing:-.01em;max-width:16ch}
+  .hero h1 em{font-style:italic;color:var(--oxblood)}
+  .hero p.lead{font-size:18px;color:var(--slate);max-width:54ch;margin-top:24px}
+  .hero .cta{display:inline-flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:2px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:.18s}
+  .btn-dark{background:var(--ink);color:var(--bone)}
+  .btn-dark:hover{background:#000}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+  .btn-ghost:hover{background:var(--ink);color:var(--bone)}
+
+  /* ---- Stat strip ---- */
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:34px 0 0}
+  .stat{background:var(--bone);padding:22px 20px}
+  .stat .n{font-family:'Fraunces',serif;font-size:30px;font-weight:500}
+  .stat .n.up{color:var(--green)} .stat .n.down{color:var(--red)}
+  .stat .l{font-size:12.5px;color:var(--slate);margin-top:4px}
+  @media(max-width:680px){.strip{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---- Section ---- */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:34px}
+  .sec-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--champagne-deep)}
+  .sec-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:30px}
+  .sec-head p{color:var(--slate);font-size:15px;margin-left:auto;max-width:40ch;text-align:right}
+  @media(max-width:680px){.sec-head{flex-direction:column;gap:6px}.sec-head p{text-align:left;margin-left:0}}
+
+  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
+  @media(max-width:880px){.grid2{grid-template-columns:1fr;gap:30px}}
+  .chart-card{background:#fff;border:1px solid var(--line);padding:24px}
+  .chart-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+  .chart-card .sub{font-size:12.5px;color:var(--slate);margin-bottom:18px}
+  .chart-box{position:relative;height:280px}
+
+  .findings{display:flex;flex-direction:column;gap:0}
+  .finding{padding:20px 0;border-bottom:1px solid var(--line)}
+  .finding:first-child{padding-top:0}
+  .finding .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:2px;display:inline-block;margin-bottom:10px}
+  .tag.risk{background:#F5E3DF;color:var(--red)}
+  .tag.strength{background:#E2EBE3;color:var(--green)}
+  .tag.signal{background:#F2E9D4;color:var(--champagne-deep)}
+  .finding h4{font-family:'Fraunces',serif;font-size:19px;font-weight:500;margin-bottom:6px}
+  .finding p{font-size:14.5px;color:var(--slate)}
+
+  /* ---- Segments table ---- */
+  .seg-table{width:100%;border-collapse:collapse;font-size:14.5px}
+  .seg-table th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate);font-weight:500;padding:0 0 12px;border-bottom:1px solid var(--ink)}
+  .seg-table td{padding:14px 0;border-bottom:1px solid var(--line)}
+  .seg-table .num{font-family:'JetBrains Mono',monospace;text-align:right}
+  .pos{color:var(--green);font-weight:500}.neg{color:var(--red);font-weight:500}
+
+  /* ---- Chatbot ---- */
+  #ask{background:var(--ink);color:var(--bone)}
+  #ask .sec-head h2{color:var(--bone)}
+  #ask .sec-num{color:var(--champagne)}
+  #ask .sec-head p{color:#A9A296}
+  .chat{background:#1C1915;border:1px solid #2E2A24;border-radius:4px;overflow:hidden;max-width:760px;margin:0 auto}
+  .chat-head{padding:16px 22px;border-bottom:1px solid #2E2A24;display:flex;align-items:center;gap:10px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--champagne)}
+  .chat-head .t{font-size:13px;font-weight:600}
+  .chat-head .s{font-size:11.5px;color:#8B8478;font-family:'JetBrains Mono',monospace;margin-left:auto}
+  .chat-log{padding:22px;height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+  .msg{max-width:84%;font-size:14.5px;line-height:1.55}
+  .msg.user{align-self:flex-end;background:var(--champagne);color:var(--ink);padding:11px 16px;border-radius:14px 14px 2px 14px;font-weight:500}
+  .msg.bot{align-self:flex-start;color:#E8E3D8}
+  .msg.bot .who{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--champagne);margin-bottom:6px}
+  .msg.bot p{margin-bottom:8px}.msg.bot p:last-child{margin-bottom:0}
+  .msg.bot strong{color:#fff}
+  .typing{display:flex;gap:4px;padding:4px 0}
+  .typing span{width:6px;height:6px;border-radius:50%;background:#8B8478;animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .chat-input{display:flex;gap:10px;padding:16px 22px;border-top:1px solid #2E2A24}
+  .chat-input input{flex:1;background:#13110E;border:1px solid #2E2A24;color:var(--bone);padding:12px 15px;border-radius:3px;font-family:'Inter',sans-serif;font-size:14.5px;outline:none}
+  .chat-input input:focus{border-color:var(--champagne)}
+  .chat-input button{background:var(--champagne);color:var(--ink);border:none;padding:0 20px;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer}
+  .chat-input button:disabled{opacity:.5;cursor:not-allowed}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px auto 0;max-width:760px}
+  .chip{background:transparent;border:1px solid #3A352E;color:#C7C0B3;font-size:12.5px;padding:7px 13px;border-radius:20px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--champagne);color:var(--champagne)}
+
+  /* ---- Footer ---- */
+  footer{border-top:1px solid var(--line);padding:40px 0;font-size:13px;color:var(--slate)}
+  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  .disc{font-size:12px;max-width:60ch;margin-top:14px;color:#A39C8F}
+  a.inline{color:var(--champagne-deep);text-decoration:none;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand">Lumi<span>è</span>re</div>
+    <nav>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#segments">Segments</a>
+      <a href="#findings">Findings</a>
+      <a href="#ask">Ask the Agent</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">Earnings Intelligence · LVMH Moët Hennessy Louis Vuitton</div>
+    <h1>Executives reveal strategy on earnings calls. <em>Most people never listen.</em></h1>
+    <p class="lead">Lumière reads LVMH's quarterly results, tracks the signals that move the business, and lets you interrogate them in plain English — turning hours of analyst work into a 30-second conversation.</p>
+    <div class="cta">
+      <a href="#ask" class="btn btn-dark">Ask the agent →</a>
+      <a href="#dashboard" class="btn btn-ghost">See the data</a>
+    </div>
+
+    <div class="strip">
+      <div class="stat"><div class="n">€58.1B</div><div class="l">9M 2025 revenue</div></div>
+      <div class="stat"><div class="n up">+1%</div><div class="l">Q3 2025 organic growth</div></div>
+      <div class="stat"><div class="n down">−4%</div><div class="l">9M 2025 reported</div></div>
+      <div class="stat"><div class="n">48%</div><div class="l">Fashion &amp; Leather share</div></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2>The trend the numbers tell</h2>
+      <p>Reported revenue softened through 2024–25, but Q3 2025 marked the first return to organic growth this year.</p>
+    </div>
+    <div class="grid2">
+      <div class="chart-card">
+        <h3>Quarterly revenue &amp; organic growth</h3>
+        <div class="sub">Revenue in € billions (bars) · organic growth % YoY (line)</div>
+        <div class="chart-box"><canvas id="revChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Where growth came from — Q3 2025</h3>
+        <div class="sub">Organic growth % by business group, nine-month basis</div>
+        <div class="chart-box"><canvas id="segChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEGMENTS -->
+  <section id="segments">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>Division by division</h2>
+      <p>Fashion &amp; Leather is the profit engine — and the swing factor for the whole group.</p>
+    </div>
+    <table class="seg-table">
+      <thead><tr><th>Business group</th><th class="num">FY2024 revenue</th><th class="num">9M 2025 organic</th><th>Read</th></tr></thead>
+      <tbody>
+        <tr><td>Fashion &amp; Leather Goods</td><td class="num">€41.1B</td><td class="num neg">−6%</td><td>Largest division; decline slowed in Q3</td></tr>
+        <tr><td>Selective Retailing (Sephora, DFS)</td><td class="num">€18.3B</td><td class="num pos">+3%</td><td>Sephora the standout; DFS recovering</td></tr>
+        <tr><td>Perfumes &amp; Cosmetics</td><td class="num">€8.4B</td><td class="num">Stable</td><td>Dior &amp; Guerlain launches holding demand</td></tr>
+        <tr><td>Watches &amp; Jewelry</td><td class="num">€10.6B</td><td class="num pos">+1%</td><td>Tiffany &amp; Bvlgari driving the segment</td></tr>
+        <tr><td>Wines &amp; Spirits</td><td class="num">€5.9B</td><td class="num neg">−4%</td><td>Most challenged; cognac weakness in US/China</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FINDINGS -->
+  <section id="findings">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>What the agent flagged</h2>
+      <p>Strategic signals pulled from the transcript — not just the headline number.</p>
+    </div>
+    <div class="grid2">
+      <div class="findings">
+        <div class="finding">
+          <span class="tag signal">Turning point</span>
+          <h4>Q3 2025 broke a two-quarter decline</h4>
+          <p>After −3% (Q1) and −4% (Q2), Q3 organic growth turned positive at +1% — the first growth of the year, touching nearly every division. The business stopped getting worse.</p>
+        </div>
+        <div class="finding">
+          <span class="tag risk">Headwind</span>
+          <h4>A strong euro is masking real demand</h4>
+          <p>Currency shaved ~5 points off Q3 growth. Reported revenue (−4%) looks worse than underlying local-currency demand, which is recovering — especially in China.</p>
+        </div>
+        <div class="finding">
+          <span class="tag risk">Watch</span>
+          <h4>Price-hike fatigue is real</h4>
+          <p>Repeated price increases plus US trade uncertainty pushed back demand for high-priced handbags in Asia and the US. Pricing power has limits, and LVMH is testing them.</p>
+        </div>
+      </div>
+      <div class="findings">
+        <div class="finding">
+          <span class="tag strength">Strength</span>
+          <h4>Selective Retailing is the quiet winner</h4>
+          <p>Sephora delivered a "remarkable performance" (+7% in Q3) while the fashion engine stalled — proof the portfolio model cushions single-division weakness.</p>
+        </div>
+        <div class="finding">
+          <span class="tag strength">Strength</span>
+          <h4>China is turning the corner</h4>
+          <p>Asia ex-Japan improved meaningfully, with Louis Vuitton and Dior both seeing better local-customer momentum — the single most important regional signal for the group.</p>
+        </div>
+        <div class="finding">
+          <span class="tag signal">Management tone</span>
+          <h4>From "resilience" to "desirability"</h4>
+          <p>Leadership language shifted toward continuously enhancing brand desirability and retail excellence — a tell that the strategy is defending pricing power, not chasing volume.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHATBOT -->
+  <section id="ask">
+    <div class="wrap" style="padding:0">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2>Ask the agent</h2>
+        <p>Powered by live AI, grounded in LVMH's real 2023–2025 results.</p>
+      </div>
+
+      <div class="chat">
+        <div class="chat-head">
+          <span class="dot"></span>
+          <span class="t">Lumière Agent</span>
+          <span class="s">LVMH · FY2023–9M2025</span>
+        </div>
+        <div class="chat-log" id="log">
+          <div class="msg bot">
+            <div class="who">Lumière</div>
+            <p>Ask me anything about LVMH's recent performance — revenue trends, why sales softened, how China is doing, or what's driving each division. I'll answer from the real earnings data.</p>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input id="q" type="text" placeholder="e.g. Why did revenue drop in 2025?" autocomplete="off">
+          <button id="send">Ask</button>
+        </div>
+      </div>
+
+      <div class="chips" id="chips">
+        <button class="chip">How did revenue trend over the last two years?</button>
+        <button class="chip">Why did sales drop?</button>
+        <button class="chip">How is China performing?</button>
+        <button class="chip">Which division is strongest?</button>
+        <button class="chip">Is the price-hike strategy working?</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <strong>Lumière</strong> · Earnings Intelligence Agent
+      <div class="disc">Built as an independent strategy &amp; analytics demonstration. All figures sourced from LVMH's published quarterly results (FY2023–9M 2025). Not affiliated with or endorsed by LVMH. For illustrative purposes.</div>
+    </div>
+    <div>Designed &amp; built by Sakshi Pednekar</div>
+  </div>
+</footer>
+
+<script>
+/* ----------  CHARTS  ---------- */
+const ink='#13110E', champ='#C9A75A', oxblood='#5A1F22', slate='#6B655B', line='#E2DAcb';
+Chart.defaults.font.family="'Inter',sans-serif";
+Chart.defaults.color=slate;
+
+new Chart(document.getElementById('revChart'),{
+  data:{
+    labels:['Q3 24','Q4 24','Q1 25','Q2 25','Q3 25'],
+    datasets:[
+      {type:'bar',label:'Revenue (€B)',data:[19.1,23.9,20.3,19.5,18.3],
+       backgroundColor:'rgba(201,167,90,.28)',borderColor:champ,borderWidth:1,yAxisID:'y',order:2},
+      {type:'line',label:'Organic growth %',data:[-3,1,-3,-4,1],
+       borderColor:oxblood,backgroundColor:oxblood,borderWidth:2,tension:.3,pointRadius:4,pointBackgroundColor:oxblood,yAxisID:'y1',order:1}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
+    scales:{
+      y:{position:'left',grid:{color:line},title:{display:true,text:'€B',font:{size:10}}},
+      y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'% organic',font:{size:10}},ticks:{callback:v=>v+'%'}}
+    }
+  }
+});
+
+new Chart(document.getElementById('segChart'),{
+  type:'bar',
+  data:{
+    labels:['Selective Retail','Watches & Jewelry','Perfumes & Cosm.','Fashion & Leather','Wines & Spirits'],
+    datasets:[{label:'9M 2025 organic %',data:[3,1,0,-6,-4],
+      backgroundColor:[3,1,0,-6,-4].map(v=>v>=0?'#3F6B4C':'#9C3A2E')
+    }]
+  },
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:line},ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:11.5}}}}
+  }
+});
+
+/* ----------  CHATBOT  ---------- */
+const log=document.getElementById('log'), input=document.getElementById('q'), sendBtn=document.getElementById('send');
+
+function addUser(t){
+  const d=document.createElement('div');d.className='msg user';d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+function addBot(html){
+  const d=document.createElement('div');d.className='msg bot';
+  d.innerHTML='<div class="who">Lumière</div>'+html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
+}
+function typing(){
+  const d=document.createElement('div');d.className='msg bot';
+  d.innerHTML='<div class="who">Lumière</div><div class="typing"><span></span><span></span><span></span></div>';
+  log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
+}
+function fmt(t){
+  // minimal markdown: **bold** and paragraph breaks
+  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  return t.split(/\n{2,}|\n/).filter(x=>x.trim()).map(p=>'<p>'+p.trim()+'</p>').join('');
+}
+
+async function ask(question){
+  if(!question.trim())return;
+  addUser(question);
+  input.value='';sendBtn.disabled=true;
+  const t=typing();
+  try{
+    const r=await fetch('/api/ask',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question})
+    });
+    const data=await r.json();
+    t.remove();
+    if(data.answer){addBot(fmt(data.answer));}
+    else{addBot('<p>I couldn\u2019t reach the analysis engine just now. Please try again in a moment.</p>');}
+  }catch(e){
+    t.remove();
+    addBot('<p>Connection issue — please try again.</p>');
+  }
+  sendBtn.disabled=false;input.focus();
+}
+
+sendBtn.onclick=()=>ask(input.value);
+input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value)});
+document.getElementById('chips').addEventListener('click',e=>{
+  if(e.target.classList.contains('chip'))ask(e.target.textContent);
+});
+</script>
+</body>
+</html>
